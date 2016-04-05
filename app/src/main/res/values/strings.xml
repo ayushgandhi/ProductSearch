@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BEProOne</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="unknownservererror">Unknown Server Error</string>
+    <string name="progressmsg">Please wait&#8230;</string>
+    <string name="action_settings">Settings</string>
+    <string name="apierror">An error occurred while communicating with the server : </string>
+</resources>
