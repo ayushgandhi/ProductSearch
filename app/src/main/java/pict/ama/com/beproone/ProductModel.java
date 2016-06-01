@@ -11,7 +11,12 @@ public class ProductModel
     private int price;
     private int listprice;
     private int id;
-
+    public void temp()
+    {
+        String s=imageUrl;
+        s=s.substring(1,5)+":"+s.substring(5);
+        imageUrl=s;
+    }
     public int getID(){return id;}
 
     public void setID(int a){this.id=a;}

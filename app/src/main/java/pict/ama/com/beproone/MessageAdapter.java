@@ -107,19 +107,20 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
 
             /************  Set Model values in Holder elements ***********/
             holder.name.setText(tempValues.getName());
-            holder.price.setText("Original price:" + tempValues.getPrice());
-            holder.listprice.setText("Offer price:" + tempValues.getListprice());
+            holder.price.setText("Offer price:" + tempValues.getPrice());
+            holder.listprice.setText(""+tempValues.getListprice());
             holder.website.setText(tempValues.getWebsite());
             final Context c = vi.getContext();
             Picasso.with(c).load(tempValues.getImageUrl()).into(new com.squareup.picasso.Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    Bitmap bmapScaled = bitmap.createScaledBitmap(bitmap, 50, 50, true);
+                    Bitmap bmapScaled = bitmap.createScaledBitmap(bitmap, 200, 300, true);
                     holder.imageLink.setImageBitmap(bmapScaled);
                 }
 
                 @Override
                 public void onBitmapFailed(Drawable errorDrawable) {
+                    Log.e("MessageAdapter","url failed");
 
                 }
 

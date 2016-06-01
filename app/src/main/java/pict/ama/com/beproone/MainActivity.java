@@ -1,12 +1,15 @@
 package pict.ama.com.beproone;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -29,6 +32,9 @@ import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
+    ProgressDialog progress;
+    String rectext;
+    Boolean fs;
     Button b1,b2,b3;
     Bitmap bmapScaled;
     ImageView iv;
@@ -37,6 +43,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp=getSharedPreferences("Language file copied",MODE_PRIVATE);
+        fs=sp.getBoolean("Copied",false);
+        if(fs==false)
+        {
+            copyAssets();
+            SharedPreferences.Editor ed = sp.edit();
+            ed.putBoolean("Copied", true);
+            ed.commit();
+        }
         setContentView(R.layout.activity_main);
         b1=(Button)findViewById(R.id.button);
         b2=(Button)findViewById(R.id.button2);
@@ -104,28 +119,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(Intent.createChooser(intent, ""), PICK_IMAGE);
                 break;
             case R.id.button2:
-                Log.e("Data path:",DATA_PATH);
-                TessBaseAPI tess=new TessBaseAPI();
-                tess.init(DATA_PATH, "eng");
-                tess.setImage(bmapScaled);
-                String rectext=tess.getUTF8Text();
-                tess.end();
-                Log.e("Text recognized:",rectext);
+               /* progress=new ProgressDialog(this);
+                Thread t=new Thread() {
+                    public void run() {
+                        try {
+                            Log.e("Data path:", DATA_PATH);
+                            TessBaseAPI tess=new TessBaseAPI();
+                            tess.init(DATA_PATH, "eng");
+                            tess.setImage(bmapScaled);
+                            rectext=tess.getUTF8Text();
+                            tess.end();
+                            Log.e("Text recognized:", rectext);
+                        } catch(Exception e) {
+                            Log.e("threadmessage",e.getMessage());
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progress = ProgressDialog.show(MainActivity.this, "Just a moment", "Analysing image for text", true);
+                            }
+                        });
+                    }
+                };
+                t.start();
                 try
                 {
-                    Class ourClass = Class.forName("pict.ama.com.beproone.OutputActivity");
-                    Intent ourIntent = new Intent(MainActivity.this, ourClass);
-                    ourIntent.putExtra("Rec Text",rectext);
-                    Log.e("hi","hi");
-                    startActivity(ourIntent);
+                    t.join();
+                    progress.dismiss();
                 }
-                catch(ClassNotFoundException e)
+                catch (InterruptedException e)
                 {
                     e.printStackTrace();
-                }
+                }*/
+                new OCR().execute(bmapScaled);
                 break;
             case R.id.button3:
-                copyAssets();
+                //copyAssets();
                 break;
         }
     }
@@ -141,8 +170,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try
                 {
                     bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImageUri));
-                    bmapScaled=bitmap.createScaledBitmap(bitmap, 3120, 4208, true);
-                    iv.setImageBitmap(bitmap);
+                    bmapScaled=bitmap.createScaledBitmap(bitmap, 3120, 3120, true);
+                    iv.setImageBitmap(bmapScaled);
                 }
                 catch(FileNotFoundException e)
                 {
@@ -171,5 +200,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    protected class OCR extends AsyncTask<Bitmap,Void,String>
+    {
+        ProgressDialog pd;
+        @Override
+        protected void onPreExecute()
+        {
+            pd=new ProgressDialog(MainActivity.this);
+            pd= ProgressDialog.show(MainActivity.this, "Just a moment", "Analysing image for text", true);
+        }
+        @Override
+        protected String doInBackground(Bitmap... b)
+        {
+            String s;
+            Log.e("Data path:", DATA_PATH);
+            TessBaseAPI tess=new TessBaseAPI();
+            tess.init(DATA_PATH, "eng");
+            tess.setImage(bmapScaled);
+            s=tess.getUTF8Text();
+            tess.end();
+            Log.e("Text recognized:", s);
+            return s;
+        }
+        @Override
+        protected void onPostExecute(String s)
+        {
+            rectext=s;
+            pd.dismiss();
+            try
+            {
+                Class ourClass = Class.forName("pict.ama.com.beproone.OutputActivity");
+                Intent ourIntent = new Intent(MainActivity.this, ourClass);
+                ourIntent.putExtra("Rec Text",rectext);
+                Log.e("hi","hi");
+                startActivity(ourIntent);
+            }
+            catch(ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 }

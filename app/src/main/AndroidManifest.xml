@@ -22,6 +22,10 @@
             android:name=".OutputActivity"
             android:label="@string/app_name"
         />
+        <activity
+            android:name=".ProductActivity"
+            android:label="@string/app_name"
+            />
     </application>
 
 </manifest>

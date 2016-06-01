@@ -40,20 +40,18 @@ import java.io.OutputStream;
 public class OutputActivity extends AppCompatActivity
 {
     TextView tv,tv_json;
-    Button b;
+    Button b,bl;
     String s;
-    JSONObject j=new JSONObject();
+    JSONObject j,j_r=new JSONObject();
+    String re;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.out);
         Intent intent=getIntent();
         s=intent.getStringExtra("Rec Text");
-        String delimit="MRP";
-        String delimit_e="\n";
-        String[] token=s.split(delimit);
-        //String[] fin_token=token[1].split(delimit_e);
        try {
+           j=new JSONObject();
             j.put("string",s);
         }
         catch (JSONException e)
@@ -64,21 +62,43 @@ public class OutputActivity extends AppCompatActivity
         tv_json=(TextView)findViewById(R.id.textView2);
         tv.setText(s);
         b=(Button)findViewById(R.id.button4);
+        bl=(Button)findViewById(R.id.button5);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.button4:
-                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_text/";
+
+                }
+            }
+        });
+        bl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.button5:
+                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_results/";
                         JsonObjectRequest searchRequest = new JsonObjectRequest(URL, j, new Response.Listener<JSONObject>() {
                             @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d("Token Success", response.toString());
+                            public void onResponse(JSONObject response)
+                            {
+                                j_r=response;
+                                re=response.toString();
+                                Log.e("Json to string",re);
+                                try {
+                                    Class ourClass = Class.forName("pict.ama.com.beproone.ProductActivity");
+                                    Intent ourIntent = new Intent(OutputActivity.this, ourClass);
+                                    ourIntent.putExtra("Response",re);
+                                    startActivity(ourIntent);
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 VolleyLog.e("Token Send Error", error.getMessage());
+                                Toast.makeText(OutputActivity.this,error.getMessage(),Toast.LENGTH_LONG).show();
                             }
                         });
 
@@ -89,20 +109,8 @@ public class OutputActivity extends AppCompatActivity
 
                         //Add a request (in this example, called stringRequest) to your RequestQueue.
                         VolleyStringRequestQueue.getInstance(getApplicationContext()).addToRequestQueue(searchRequest);
+
                 }
-            }
-        });
-       // tv_json.setText(j.toString());
-        MightySeaAPI.search(this,s,new MightySeaAPI.IAPICallback(){
-            @Override
-            public void success(String response)
-            {
-                Toast.makeText(getApplicationContext(), "Successfully sent the string!", Toast.LENGTH_LONG);
-            }
-            @Override
-            public void failure(String message)
-            {
-                Toast.makeText(getApplicationContext(),"UnSuccessfull!",Toast.LENGTH_LONG);
             }
         });
     }
