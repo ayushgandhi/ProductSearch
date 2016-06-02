@@ -44,36 +44,48 @@ public class ProductActivity extends AppCompatActivity
         catch(JSONException e){
             e.printStackTrace();
         }
-        JSONObject[] res=new JSONObject[10];
-        for(int i=0;i<10;i++)
-        {
-            try
-            {
-                res[i]=j.getJSONObject(Integer.toString(i+1));
+        Integer im;
+        im=j.length();
+        if(im>0) {
+            JSONObject[] res = new JSONObject[im];
+            for (int i = 0; i < im; i++) {
+                try {
+                    res[i] = j.getJSONObject(Integer.toString(i + 1));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-            catch (JSONException e)
-            {
-                e.printStackTrace();
+            for (int i = 0; i < im; i++) {
+                ProductModel m = new ProductModel();
+                try {
+                    m.setName(res[i].getString("name"));
+                    m.setID(res[i].getInt("id"));
+                    m.setImageUrl(res[i].getString("imageLink"));
+                    m.temp();
+                    m.setPrice(res[i].getInt("price"));
+                    m.setListprice(res[i].getInt("listPrice"));
+                    m.setWebsite(res[i].getString("referredFrom"));
+                    Log.e("ImageLink" + Integer.toString(i + 1), m.getImageUrl());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                c_list.add(i, m);
+                res1 = getResources();
+                ca = new MessageAdapter(ProductActivity.this, c_list, res1);
+                lv.setAdapter(ca);
             }
         }
-        for(int i=0;i<10;i++)
+        else
         {
-            ProductModel m=new ProductModel();
-            try {
-                m.setName(res[i].getString("name"));
-                m.setID(res[i].getInt("id"));
-                m.setImageUrl(res[i].getString("imageLink"));
-                m.temp();
-                m.setPrice(res[i].getInt("price"));
-                m.setListprice(res[i].getInt("listPrice"));
-                m.setWebsite(res[i].getString("referredFrom"));
-                Log.e("ImageLink"+Integer.toString(i+1),m.getImageUrl());
-            }
-            catch (JSONException e)
-            {
-                e.printStackTrace();
-            }
-            c_list.add(i,m);
+            ProductModel m = new ProductModel();
+            m.setName("No results found");
+            m.setID(1);
+            m.setImageUrl("");
+            //m.temp();
+            m.setPrice(0);
+            m.setListprice(0);
+            m.setWebsite("Not Found");
+            c_list.add(0, m);
             res1=getResources();
             ca=new MessageAdapter(ProductActivity.this,c_list,res1);
             lv.setAdapter(ca);

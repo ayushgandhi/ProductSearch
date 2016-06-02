@@ -7,28 +7,27 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-
 import com.googlecode.tesseract.android.TessBaseAPI;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
@@ -38,7 +37,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button b1,b2,b3;
     Bitmap bmapScaled;
     ImageView iv;
-    private int PICK_IMAGE,h=320,w=320;
+    private Uri mImageUri;
+    private String pictureImagePath = "";
+    final static int cameraResults=0;
+    private int PICK_IMAGE=1,h=320,w=320;
     private String DATA_PATH="/storage/emulated/0/Android/data/pict.ama.com.beproone/files/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         OutputStream out = null;
             try {
                 in = assetManager.open(filename);
+                File md=new File(getExternalFilesDir(null)+"/tessdata/");
+                boolean m=md.mkdirs();
+                Log.e("Directory made:",m+" ");
+                Log.e("Path",md+" ");
                 File o1=getExternalFilesDir(null);
                 File outFile = new File(getExternalFilesDir(null)+"/tessdata", filename);
                 //DATA_PATH=o1.getAbsolutePath();
@@ -119,42 +125,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(Intent.createChooser(intent, ""), PICK_IMAGE);
                 break;
             case R.id.button2:
-               /* progress=new ProgressDialog(this);
-                Thread t=new Thread() {
-                    public void run() {
-                        try {
-                            Log.e("Data path:", DATA_PATH);
-                            TessBaseAPI tess=new TessBaseAPI();
-                            tess.init(DATA_PATH, "eng");
-                            tess.setImage(bmapScaled);
-                            rectext=tess.getUTF8Text();
-                            tess.end();
-                            Log.e("Text recognized:", rectext);
-                        } catch(Exception e) {
-                            Log.e("threadmessage",e.getMessage());
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progress = ProgressDialog.show(MainActivity.this, "Just a moment", "Analysing image for text", true);
-                            }
-                        });
-                    }
-                };
-                t.start();
-                try
-                {
-                    t.join();
-                    progress.dismiss();
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }*/
                 new OCR().execute(bmapScaled);
                 break;
             case R.id.button3:
-                //copyAssets();
+
+                Intent i;
+                i=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                String imageFileName = timeStamp + ".jpg";
+                File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
+                File file = new File(pictureImagePath);
+                mImageUri = Uri.fromFile(file);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+                startActivityForResult(i,cameraResults);
                 break;
         }
     }
@@ -176,6 +161,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 catch(FileNotFoundException e)
                 {
                     e.printStackTrace();
+                }
+            }
+            if(requestCode==cameraResults)
+            {
+               // Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                //bmapScaled=thumbnail;
+               // bmapScaled=bmapScaled.createScaledBitmap(bmapScaled, 3120, 3120, true);
+               // iv.setImageBitmap(bmapScaled);
+                File imgFile = new  File(pictureImagePath);
+                if(imgFile.exists()){
+                    bmapScaled= BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    bmapScaled=bmapScaled.createScaledBitmap(bmapScaled, 3120,3120 , true);
+                    iv.setImageBitmap(bmapScaled);
+
                 }
             }
         }
@@ -220,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             tess.setImage(bmapScaled);
             s=tess.getUTF8Text();
             tess.end();
+            s=s.replaceAll("\n",",");
             Log.e("Text recognized:", s);
             return s;
         }

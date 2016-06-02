@@ -1,6 +1,7 @@
 package pict.ama.com.beproone;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
@@ -53,6 +55,7 @@ public class OutputActivity extends AppCompatActivity
        try {
            j=new JSONObject();
             j.put("string",s);
+           Log.e("Converted JSON:",j+"");
         }
         catch (JSONException e)
         {
@@ -61,24 +64,15 @@ public class OutputActivity extends AppCompatActivity
         tv=(TextView)findViewById(R.id.textView);
         tv_json=(TextView)findViewById(R.id.textView2);
         tv.setText(s);
-        b=(Button)findViewById(R.id.button4);
         bl=(Button)findViewById(R.id.button5);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.button4:
-
-                }
-            }
-        });
         bl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.button5:
-                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_results/";
-                        JsonObjectRequest searchRequest = new JsonObjectRequest(URL, j, new Response.Listener<JSONObject>() {
+                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_text/";
+                        String URL1="http://192.168.0.112:8000/search/get_text/";
+                        JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.POST,URL, j, new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response)
                             {
