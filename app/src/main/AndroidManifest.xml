@@ -26,6 +26,10 @@
             android:name=".ProductActivity"
             android:label="@string/app_name"
             />
+        <activity
+            android:name=".ViewProductActivity"
+            android:label="@string/app_name"
+            />
     </application>
 
 </manifest>

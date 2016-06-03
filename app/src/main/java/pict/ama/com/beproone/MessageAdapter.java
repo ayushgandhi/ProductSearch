@@ -84,8 +84,8 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
             holder = new ViewHolder();
             holder.name = (TextView) vi.findViewById(R.id.textView3);
             holder.website = (TextView) vi.findViewById(R.id.textView4);
-            holder.price = (TextView) vi.findViewById(R.id.textView5);
-            holder.listprice = (TextView) vi.findViewById(R.id.textView6);
+            holder.listprice = (TextView) vi.findViewById(R.id.textView5);
+            holder.price = (TextView) vi.findViewById(R.id.textView6);
             holder.imageLink = (ImageView) vi.findViewById(R.id.imageView2);
 
             /************  Set holder with LayoutInflater ************/
@@ -107,8 +107,8 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
 
             /************  Set Model values in Holder elements ***********/
             holder.name.setText(tempValues.getName());
-            holder.price.setText("Offer price:" + tempValues.getPrice());
-            holder.listprice.setText(""+tempValues.getListprice());
+            holder.listprice.setText("Offer price:" + tempValues.getListprice());
+            holder.price.setText(""+tempValues.getPrice());
             holder.website.setText(tempValues.getWebsite());
             final Context c = vi.getContext();
             Picasso.with(c).load(tempValues.getImageUrl()).into(new com.squareup.picasso.Target() {

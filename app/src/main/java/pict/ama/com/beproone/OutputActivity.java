@@ -2,12 +2,14 @@ package pict.ama.com.beproone;
 
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -46,6 +48,7 @@ public class OutputActivity extends AppCompatActivity
     String s;
     JSONObject j,j_r=new JSONObject();
     String re;
+    ProgressDialog pd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,9 +73,11 @@ public class OutputActivity extends AppCompatActivity
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.button5:
-                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_text/";
+                        pd=new ProgressDialog(OutputActivity.this);
+                        pd= ProgressDialog.show(OutputActivity.this, "Just a moment", "Searching for products on server", true);
+                        String URL = "https://mighty-sea-77814.herokuapp.com/search/get_results/";
                         String URL1="http://192.168.0.112:8000/search/get_text/";
-                        JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.POST,URL, j, new Response.Listener<JSONObject>() {
+                        JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.POST,URL1, j, new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response)
                             {
@@ -80,30 +85,34 @@ public class OutputActivity extends AppCompatActivity
                                 re=response.toString();
                                 Log.e("Json to string",re);
                                 try {
+                                    pd.dismiss();
                                     Class ourClass = Class.forName("pict.ama.com.beproone.ProductActivity");
                                     Intent ourIntent = new Intent(OutputActivity.this, ourClass);
+                                    Log.e("Response:",re);
                                     ourIntent.putExtra("Response",re);
                                     startActivity(ourIntent);
                                 } catch (ClassNotFoundException e) {
                                     e.printStackTrace();
                                 }
+
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                pd.dismiss();
                                 VolleyLog.e("Token Send Error", error.getMessage());
                                 Toast.makeText(OutputActivity.this,error.getMessage(),Toast.LENGTH_LONG).show();
                             }
                         });
 
                         searchRequest.setRetryPolicy(new DefaultRetryPolicy(
-                                5000,
+                                50000,
                                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
                         //Add a request (in this example, called stringRequest) to your RequestQueue.
                         VolleyStringRequestQueue.getInstance(getApplicationContext()).addToRequestQueue(searchRequest);
-
+                        break;
                 }
             }
         });

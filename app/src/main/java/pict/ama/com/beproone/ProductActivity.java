@@ -1,14 +1,19 @@
 package pict.ama.com.beproone;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.lang.Integer.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by root on 4/5/16.
@@ -32,6 +37,20 @@ public class ProductActivity extends AppCompatActivity
         lv=(ListView)findViewById(R.id.listView);
         lv.setAdapter(ca);
         onsuccess(s);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    Class ourClass = Class.forName("pict.ama.com.beproone.ViewProductActivity");
+                    Intent ourIntent = new Intent(ProductActivity.this, ourClass);
+                    ourIntent.putExtra("Product model list",c_list);
+                    ourIntent.putExtra("Position",position);
+                    startActivity(ourIntent);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
     public void onsuccess(String response)
     {
@@ -61,10 +80,17 @@ public class ProductActivity extends AppCompatActivity
                     m.setName(res[i].getString("name"));
                     m.setID(res[i].getInt("id"));
                     m.setImageUrl(res[i].getString("imageLink"));
-                    m.temp();
-                    m.setPrice(res[i].getInt("price"));
-                    m.setListprice(res[i].getInt("listPrice"));
                     m.setWebsite(res[i].getString("referredFrom"));
+                    m.setUrl(res[i].getString("url"));
+                    if(m.getWebsite().equals("Jabong"))
+                    {
+                        m.setListprice(res[i].getInt("price"));
+                        m.setPrice(res[i].getInt("listPrice"));
+                    }
+                    else {
+                        m.setPrice(res[i].getInt("price"));
+                        m.setListprice(res[i].getInt("listPrice"));
+                    }
                     Log.e("ImageLink" + Integer.toString(i + 1), m.getImageUrl());
                 } catch (JSONException e) {
                     e.printStackTrace();

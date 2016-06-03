@@ -1,22 +1,21 @@
 package pict.ama.com.beproone;
 
+import java.io.Serializable;
+
 /**
  * Created by root on 4/5/16.
  */
-public class ProductModel
+public class ProductModel implements Serializable
 {
     private String website;
     private String name;
     private String imageUrl;
+    private String url;
     private int price;
     private int listprice;
     private int id;
-    public void temp()
-    {
-        String s=imageUrl;
-        s=s.substring(1,5)+":"+s.substring(5);
-        imageUrl=s;
-    }
+    public String getUrl(){return url;}
+    public void setUrl(String u){this.url=u;}
     public int getID(){return id;}
 
     public void setID(int a){this.id=a;}
